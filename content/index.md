@@ -1,4 +1,5 @@
 ---
+title: "主页"
 menu:
     main:
         name: Home
