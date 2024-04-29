@@ -7,13 +7,13 @@
 #icon = "home"
 #newtab = true
 
-#[[social]]
-#identifier = "github"
-#name = "GitHub"
-#url = "https://github.com/CaiJimmy/hugo-theme-stack"
+[[social]]
+identifier = "Email"
+name = "Email"
+url = "mailto:wxx1035@163.com"
 
-#[social.params]
-#icon = "brand-github"
+[social.params]
+icon = "mail"
 
 #[[social]]
 #identifier = "twitter"
