@@ -244,7 +244,7 @@ std::shared_lock<std::mutex> locker(mtx);
 
 递归锁可以重复加锁，会记录加锁的次数，每次加锁，计数+1，且判断如果已经锁住，不做处理，每次解锁，计数-1
 
-### C 函数
+### C 函数（Linux)
 
 ```c
 // 声明
@@ -261,7 +261,7 @@ pthread_mutexattr_destroy(&mtx);
 pthread_mutexattr_trylock(&mtx);
 ```
 
-### C11
+### C11（全平台）
 
 ```c++
 // 声明
