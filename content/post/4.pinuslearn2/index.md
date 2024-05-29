@@ -1,7 +1,7 @@
 ---
 title: pinus 学习（二）源码分析:默认组件
 description: 各默认组件的源码分析
-slug: pinusLearn1
+slug: pinuslearn2
 date: 2024-05-29 00:00:00+0000
 categories:
     - pinus

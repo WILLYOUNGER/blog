@@ -1,7 +1,7 @@
 ---
 title: pinus 学习（一）项目结构与源码分析启动
 description: 项目结构介绍，项目入口，服务器启动流程介绍
-slug: pinusLearn0
+slug: pinuslearn1
 date: 2024-05-28 00:00:00+0000
 categories:
     - pinus
