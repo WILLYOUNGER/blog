@@ -1,5 +1,5 @@
 ---
-title: pinus 学习（一）项目结构与项目启动介绍
+title: pinus 学习（一）项目结构与源码分析启动
 description: 项目结构介绍，项目入口，服务器启动流程介绍
 slug: pinusLearn0
 date: 2024-05-28 00:00:00+0000
@@ -13,7 +13,7 @@ params:
     author: 王新晓
 ---
 
-# pinus 学习（一）项目结构与项目启动介绍
+# pinus 学习（一）项目结构与源码分析启动
 项目结构介绍，项目入口，服务器启动流程介绍
 
 ## 目录结构
@@ -36,7 +36,7 @@ params:
 
 创建的helloworld的示例工程的game-server中启动了两个服务器，master服务器和connector服务器
 
-服务器中通过添加组件（component)来增加功能
+服务器中通过添加组件(component)来增加功能
 
 #### master服务器
 
@@ -94,7 +94,7 @@ rpc 中 的server，服务与其他服务器，接收其他服务器的调用
 
 在game-server目录中执行`npm i`安装第三方依赖，然后运行`tsc`，编译TS代码，编译结果将输出到dist文件夹中，然后运行`node cooy` 拷贝配置文件到dist目录中，再在dist目录中执行`node app` ,服务器就启动了。
 
-
+## 源码分析
 
 ### app.ts
 
@@ -138,7 +138,67 @@ app.start();
 
 `let app = pinus.createApp();` 这里创建了Application类，在createApp中调用了init，然后使用`app.configure()` 来给每个服务器设置配置，添加自定义组件，最后`app.start()` 启动服务器
 
+### pinus.createApp()
 
+创建一个application，其中init函数如下：
+
+```ts
+init(opts ?: ApplicationOptions) {
+        opts = opts || {};
+        let base = opts.base || path.dirname(require.main.filename);
+        this.set(Constants.RESERVED.BASE, base);
+        this.base = base;	//设置项目根目录
+
+        appUtil.defaultConfiguration(this);
+
+        this.state = STATE_INITED;
+        logger.info('application inited: %j', this.getServerId());
+    }
+    
+appUtil.ts
+export function defaultConfiguration(app: Application) {
+    let args = parseArgs(process.argv);//解析运行命令参数
+    setupEnv(app, args);				//设置当前环境（Development或是Production）
+    loadMaster(app);					//从config目录中读取master.json配置记录
+    loadServers(app);					//从config目录中读取servers.json配置记录
+    processArgs(app, args);				//解析命令行参数，这里面只有master服务器可以从命令行中获取参数，其他服务器都会从配置文件中获取参数
+    configLogger(app);					//配置日志
+    loadLifecycle(app);					//helloworld示例工程中没有，根据后面的代码，猜测是插件的加载（插件在后面介绍，大概是一系列功能的集合）
+}
+```
+
+### app.configure()
+
+根据传入的env和type来决定是否要执行fn里的内容，helloworld示例工程中的这个函数，只有connector服务器需要执行
+
+```ts
+configure(fn: ConfigureCallback): Application;
+    configure(env: string, fn: ConfigureCallback): Application;
+    configure(env: string, type: string, fn: ConfigureCallback): Application;
+    configure(env: string | ConfigureCallback, type ?: string | ConfigureCallback, fn ?: ConfigureCallback): Application {
+        let args = [].slice.call(arguments);
+        fn = args.pop();
+        env = type = Constants.RESERVED.ALL;
+
+        if (args.length > 0) {
+            env = args[0];
+        }
+        if (args.length > 1) {
+            type = args[1];
+        }
+
+        if (env === Constants.RESERVED.ALL || contains(this.settings.env, env as string)) {
+            if (type === Constants.RESERVED.ALL || contains(this.settings.serverType, type as string)) {
+                fn.call(this);
+            }
+        }
+        return this;
+    }
+```
+
+### app.start()
+
+读取完配置后，这里正式启动服务器
 
 ```ts
 start(cb ?: (err ?: Error, result ?: void) => void) {
@@ -186,17 +246,16 @@ start(cb ?: (err ?: Error, result ?: void) => void) {
     }
 ```
 
+appUtil.startByType，这个函数可以根据配置决定是否通过master服务器来启动其他服务器，如果不通过master服务器启动，会直接在这里启动服务，start（）后面的逻辑也不会执行了，
 
+如果通过Master服务器启动，会执行回调函数，回调函数中`appUtil.loadDefaultComponents(self);` 加载了默认的组件，项目结构中介绍了的组件全部是默认组件，connector服务器的组件就是非master服务器的默认组件。
 
-## Component实现
+加载默认组件会直接创建出来，调用构造函数。
 
-下面来看一下各个组件的具体实现，先看Master的两个默认组件
+下面通过`appUtil.optLifecycles`  执行每个插件的beforeStartup，然后再通过`appUtil.optComponents` 执行每个组件的beforeStart与start，然后执行 `self.afterStart(cb);`，afterStart里面将执行每个组件的afterStart和每个插件的afterStartup
 
-### MasterComponent
+最后发送start_server信号，一个服务器就启动了
 
-
-
-### MonitorComponent
-
+>组件和插件中的afterStartAll，将会再所有服务器启动后执行，这是单个服务器启动的逻辑，所以没有调用
 
 
