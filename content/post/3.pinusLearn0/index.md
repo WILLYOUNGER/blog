@@ -38,55 +38,55 @@ params:
 
 服务器中通过添加组件(component)来增加功能
 
-#### master服务器
+### master服务器
 
-##### MasterComponent
+#### MasterComponent
 
 监控功能，启动了其他服务器
 
-##### MonitorComponent
+#### MonitorComponent
 
 监控功能
 
-#### connector服务器
+### connector服务器
 
-##### ProxyComponent
+#### ProxyComponent
 
 rpc 中 的client，调用其他服务器的函数
 
-##### RemoteComponent
+#### RemoteComponent
 
 rpc 中 的server，服务与其他服务器，接收其他服务器的调用
 
-##### ConnectionComponent
+#### ConnectionComponent
 
 前台服务器才有，管理连接上的用户信息与用户数量
 
-##### ConnectorComponent
+#### ConnectorComponent
 
 前台服务器才有，管理用户连接，发送与接受消息，（根据配置会决定是否启动**DictionaryComponent**和**ProtobufComponent**）
 
-##### SessionComponent
+#### SessionComponent
 
 前台服务器才有，管理sessionID与socket的对应关系，sessionID在connectorComponent中设置
 
-##### PushSchedulerComponent
+#### PushSchedulerComponent
 
 前台服务器才有，推送消息
 
-##### BackendSessionComponent
+#### BackendSessionComponent
 
 绑定后台服务器sessionID与（用户和前台服务器）的关系，连接绑定前台服务器与后台服务器的用户
 
-##### ChannelComponent
+#### ChannelComponent
 
 将几个用户串成一组，可以群发消息
 
-##### ServerComponent
+#### ServerComponent
 
 服务器功能，其中有Filter（过滤器），Handler（处理某条客户端消息），Crons（一些定时任务）
 
-##### MonitorComponent
+#### MonitorComponent
 
 监控功能
 
