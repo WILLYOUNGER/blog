@@ -12,7 +12,7 @@ weight: 1       # You can add weight to some posts to override the default sorti
 params:
     author: 王新晓
 ---
-# pinus 学习（一）源码分析:默认组件
+# pinus 学习（二）源码分析:默认组件
 
 上节介绍了pinus框架创建的helloworld示例工程的创建,编译,运行,以及服务器启动的源码分析
 下面来看一下各个组件的具体实现，先看master的两个默认组件
