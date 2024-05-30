@@ -1,0 +1,108 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="记录我的代码规范"><title>王新晓的代码规范（C++）</title>
+<link rel=canonical href=https://xinxiao.wang/p/rulecpp/><link rel=stylesheet href=/scss/style.min.0304c6baf04e01a8fe70693791cb744d56a3578a3120a8796cefc66825aa39c7.css><meta property='og:title' content="王新晓的代码规范（C++）"><meta property='og:description' content="记录我的代码规范"><meta property='og:url' content='https://xinxiao.wang/p/rulecpp/'><meta property='og:site_name' content='王新晓'><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='文档'><meta property='article:published_time' content='2024-04-29T00:00:00+00:00'><meta property='article:modified_time' content='2024-04-29T00:00:00+00:00'><meta name=twitter:title content="王新晓的代码规范（C++）"><meta name=twitter:description content="记录我的代码规范"><link rel="shortcut icon" href=/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar_hu893932985fbceedf0e757380c8be3e36_37138_300x0_resize_box_3.png width=300 height=300 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>❤️</span></figure><div class=site-meta><h1 class=site-name><a href=/>王新晓</a></h1><h2 class=site-description>如切如磋，如琢如磨</h2></div></header><ol class=menu-social><li><a href=mailto:wxx1035@163.com target=_blank title=Email rel=me><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-mail"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/><path d="M3 7l9 6 9-6"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>主页</span></a></li><li><a href=/archives/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/about/><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-user"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 7a4 4 0 108 0A4 4 0 008 7"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
+<span>关于</span></a></li><li><a href=/search/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav id=TableOfContents><ol><li><a href=#一文件结构>一、文件结构</a><ol><li><a href=#头文件规范>头文件规范</a></li></ol></li><li><a href=#二命名规范>二、命名规范</a><ol><li><a href=#文件命名>文件命名</a></li><li><a href=#类型命名>类型命名</a></li><li><a href=#变量命名>变量命名</a><ol><li><a href=#局部变量>局部变量</a></li><li><a href=#全局变量>全局变量</a></li><li><a href=#成员变量>成员变量</a></li><li><a href=#函数中的参数>函数中的参数</a></li><li><a href=#其他补充规则>其他补充规则</a></li></ol></li><li><a href=#常量命名>常量命名</a></li><li><a href=#静态量命名>静态量命名</a></li><li><a href=#函数命名>函数命名</a></li><li><a href=#宏命名规范>宏命名规范</a></li><li><a href=#typedef类型命名规范>typedef类型命名规范</a></li></ol></li><li><a href=#代码风格>代码风格</a><ol><li><a href=#空格放置>空格放置</a></li><li><a href=#布局规范>布局规范</a></li><li><a href=#注释规范>注释规范</a></li><li><a href=#其他规范>其他规范</a></li></ol></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/%E4%BB%A3%E7%A0%81%E8%A7%84%E8%8C%83/>代码规范
+</a><a href=/categories/c++/>C++</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/rulecpp/>王新晓的代码规范（C++）</a></h2><h3 class=article-subtitle>记录我的代码规范</h3></div><footer class=article-time><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published>Apr 29, 2024</time></div><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 5 分钟</time></div></footer></div></header><section class=article-content><h1 id=cc编码规范>C/C++编码规范</h1><p>以下编码规则仅适用于王新晓的 C/C++代码</p><h2 id=一文件结构>一、文件结构</h2><h3 id=头文件规范>头文件规范</h3><ol><li>一个头文件需要 #define保护，命名格式为：<code>_&lt;PROJECT>_&lt;PATH>_&lt;FILE>_H_</code>
+如：项目xzpt中，头文件xzpt\Classes\xzpt\xzptGameSence.h应定义如下：（需要写全路径）（宏定义 #endif 后须加注释）</li></ol><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=cp>#ifndef _XZPT_XZPT_XZPTGAMESENCE_H_
+</span></span></span><span class=line><span class=cl><span class=cp>#define _XZPT_XZPT_XZPTGAMESENCE_H_
+</span></span></span><span class=line><span class=cl><span class=cp>#endif </span><span class=c1>// _XZPT_XZPT_XZPTGAMESENCE_H_
+</span></span></span></code></pre></td></tr></table></div></div><ol start=2><li><code>#include</code>的顺序（每种头文件间应空行）<ol><li>当前文件的对应头文件</li><li>C系统文件</li><li>C++系统文件</li><li>其他库的头文件</li><li>本项目的头文件</li></ol></li></ol><h2 id=二命名规范>二、命名规范</h2><h3 id=文件命名>文件命名</h3><p>使用小驼峰法命名如：
+<code>xzptGameSence.cpp</code>
+<code>xzptGameSence.h</code></p><h3 id=类型命名>类型命名</h3><p>class 开头为 C， struct开头为S， interface开头为I
+大驼峰法
+例如：
+<code>CXzptGameSence</code>
+<code>SXzptUserInfo</code>
+<code>IXzptLogin</code></p><h3 id=变量命名>变量命名</h3><p>指针需在结尾添加_ptr，若为常量指针（我这里的意思是指针不能改变指向的东西，但是可以改变这个指向的东西的内容）需在结尾添加_cPtr</p><h4 id=局部变量>局部变量</h4><p>以下划线开头，第一个单词代表变量的类型(STL中的情况使用小驼峰法命名)，第二个单词为项目名称，第三个单词为变量意义（使用小驼峰法），每个单词之间加下滑线，例如：
+<code>Sprite* _sprite_xzpt_up_leaves_ptr;</code>
+<code>int _int_xzpt_Level;</code>
+<code>std::vector&lt;Sprite> _vectorSprite_xzpt_listMoveShape;</code>
+<code>std::list&lt;xzptSprite*> _listXzptSpritePtr_xzpt_listShape;</code></p><h4 id=全局变量>全局变量</h4><p>以g_开头，第一个单词代表变量的类型(STL中的情况使用小驼峰法命名)，第二个单词为项目名称，第三个单词为变量意义（使用小驼峰法），每个单词间添加下滑线，例如：
+<code>char* g_char_xzpt_userInfoData_ptr;</code>
+<code>int g_int_xzpt_version;</code></p><h4 id=成员变量>成员变量</h4><p>以m_开头，第一个单词代表变量的类型(STL中的情况使用小驼峰法命名)，第二个单词为项目名称，第三个单词为变量意义（使用小驼峰法），每个单词间添加下滑线，例如：
+<code>Sprite* m_sprite_xzpt_hand_ptr;</code>
+<code>int m_int_xzpt_actionNum;</code></p><h4 id=函数中的参数>函数中的参数</h4><ol><li>直接写变量含义，例如：
+<code>calMinDistanceLineWithShape(Vec2 pointX, Vec2 pointY, Vec2 pointM);</code></li><li>函数中的参数如果是传出数据使用，再开头添加out，使用小驼峰法，例如：
+<code>calMaxTwoNumber(int num0, int num1, int& outResultNumber)</code></li></ol><h4 id=其他补充规则>其他补充规则</h4><ol><li>for循环中括号内的局部循环标记量可直接定义为字母，使用字母顺序如下 <code>i</code> <code>j</code> <code>m</code> <code>n</code> <code>x</code> <code>y</code> <code>z</code> ，之后的不做顺序规定</li><li>其中基础类型名称在对象名中体现可以只写首字母，例如：<code>int _i_xzpt_level;</code></li><li>单例对象用大写A开头，整体采用大驼峰法</li></ol><h3 id=常量命名>常量命名</h3><p>以c_开头，第一个单词代表变量的类型(STL中的情况使用小驼峰法命名)，第二个单词为项目名称，第三个单词为变量意义（使用小驼峰法），每个单词间添加下滑线，例如：
+<code>const char* c_char_xzpt_direction_ptr;</code></p><p><strong>注意：常量与变量相同拥有全局常量，局部常量等情况，故规定如下</strong>
+1. <strong>局部常量为 _c_开头</strong>
+2. <strong>其他情况可直接与开头字母合并，如下(若为全局变量)</strong>
+<code>const char* const cg_char_xzpt_hurdleInfoData_cPtr = "123.txt";</code>
+或
+<code>const char* const gc_char_xzpt_hurdleInfoData_cPtr = "123.txt";</code>
+<strong>此处gc与cg皆可</strong></p><h3 id=静态量命名>静态量命名</h3><p>以s_开头，第一个单词代表变量的类型(STL中的情况使用小驼峰法命名)，第二个单词为项目名称，第三个单词为变量意义（使用小驼峰法），每个单词间添加下滑线，例如：
+<code>static bool s_bool_xzpt_firstTimeGetDesign;</code>
+<strong>此处注意与常量注意相同，若遇到常量，静态，全局等因素组合，除局部因素将_s加在开头外，其他因素皆可直接组合例如：</strong>
+<code>static cont bool scg_bool_xzpt_firstTimeGetDesign = true;</code>
+<strong>scg可任意排列组合</strong></p><h3 id=函数命名>函数命名</h3><ol><li>函数名必须直观，并且能正确表达其内在功能</li><li>对于函数参数中的引用和指针类型视情况以const修饰</li><li>对于不修改数据成员的类成员函数，以const修饰</li><li>函数名以小写开头，使用小驼峰法</li><li>返回值为布尔型的一些检测函数，正确的要返回true，错误的返回false，不要调转含义</li></ol><h3 id=宏命名规范>宏命名规范</h3><ol><li>尽量不使用宏定义</li><li>如果使用宏需全部大写，每个单词以下滑线分割</li></ol><h3 id=typedef类型命名规范>typedef类型命名规范</h3><p><code>typedef std::vector&lt;int> SeqInt;</code> //vector的全部都在前面加Seq。
+<code>typedef ::std::map&lt;int, int> DictIntInt;</code>//map在cdl中加前缀Dict，在代码中用Map</p><ol><li>必须以大写开头。</li><li>命名翻译的是内部的组成，例如SeqInt，一看就是vector<int>。不能改为PlayerId这种具有确切意义的命名，缺乏通用性。具体含义应该在变量名上反映出来。</li></ol><h2 id=代码风格>代码风格</h2><h3 id=空格放置>空格放置</h3><ol><li>循环后加空格再加括号，例：<code>for (int i = 0; i &lt; 10; ++i)</code></li><li>函数名后不需要加空格，紧跟<code>(</code> <code>)</code></li><li><code>(</code> 后紧跟与 <code>)</code>后紧跟不加空格</li><li>嵌套<code>(</code> <code>)</code> 与<code>(</code> <code>)</code> 之间加空格如：<code>if ( (x == 1) && (x == 2) )</code></li><li><code>;</code>不是结尾加空格</li><li>除<code>[ ]</code>、<code>.</code>、<code>-></code>、<code>::</code>外，双目操作符， 如<code>=</code>、<code>+=</code>、<code>>=</code>、<code>&lt;= </code>、<code>+</code>、<code>* </code>、<code>% </code>、<code>&& </code>、<code>||</code>、<code>&lt;&lt;</code>、<code>^</code>等两侧各留一个空格。</li><li>单目操作符如<code>!</code>、<code>~</code>、<code>++</code>、<code>--</code>、<code>&</code>（地址运算符）与操作数之间不留空格。</li><li>当一个函数的返回值是指针变量或引用变量时，类型与操作符（<code>*</code>或<code>&</code>）之间不留空格，操作符之后留一个空格；</li><li>定义指针时，<code>*</code>放在对象前，与对象中间无空格，当作为函数入参时，<code>*</code>放在类后，与类中间无空格</li><li><code>{</code> <code>}</code> 用于初始化时不换行，在中间加空格</li></ol><h3 id=布局规范>布局规范</h3><ol><li>每个函数，成员函数声明之间保留一个空格</li><li>同一个函数体内，有语义转换时，保留一个空行</li><li><code>{</code> <code>}</code>会换行</li><li><code>++</code> <code>--</code>前后可选择时，放在前面</li><li><code>{</code> <code>}</code> 用于初始化时不换行，在中间加空格</li></ol><h3 id=注释规范>注释规范</h3><ol><li>块注释使用<code>/* */</code>， 行注释使用<code>//</code></li><li>函数声明前需注释函数含义（除非特别简单能从函数命名推测出来）（若函数功能简单，无需介绍返回值与参数也可以使用 <code>//</code>直接写注释）具体格式如下：</li></ol><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>/** 
+</span></span><span class=line><span class=cl>*  @brief 这里写函数功能
+</span></span><span class=line><span class=cl>* @param i 参数1
+</span></span><span class=line><span class=cl>* @return 返回说明
+</span></span><span class=line><span class=cl>*    -&lt;em&gt;false&lt;/em&gt; fail
+</span></span><span class=line><span class=cl>*    -&lt;em&gt;true&lt;/em&gt; succeed
+</span></span><span class=line><span class=cl>*/
+</span></span><span class=line><span class=cl>bool funciotn(int i)
+</span></span></code></pre></td></tr></table></div></div><ol start=3><li>代码的注释放在该行代码上</li><li>函数实现的开头需要写函数实现的大致步骤（特别简单的可不写）</li><li>每个文件最前面需写注释，格式如下(可适当删除不需要的项）)：</li></ol><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>/**
+</span></span><span class=line><span class=cl>*  @file     Example.h
+</span></span><span class=line><span class=cl>*  @brief    对文件的简述 
+</span></span><span class=line><span class=cl>*  Details. 
+</span></span><span class=line><span class=cl>* 
+</span></span><span class=line><span class=cl>*  @author   wangxinxiao
+</span></span><span class=line><span class=cl>*  @email    wxx1035@163.com
+</span></span><span class=line><span class=cl>*  @version  1.0.0.1(版本号) 
+</span></span><span class=line><span class=cl>*  @date     2022/5/11
+</span></span><span class=line><span class=cl>*  @license  GNU General Public License (GPL) 
+</span></span><span class=line><span class=cl>* 
+</span></span><span class=line><span class=cl>*  Remark         : Description
+</span></span><span class=line><span class=cl>*
+</span></span><span class=line><span class=cl>*  Change History : 
+</span></span><span class=line><span class=cl>*  &lt;Date&gt;     | &lt;Version&gt; | &lt;Author&gt;       | &lt;Description&gt; 
+</span></span><span class=line><span class=cl>*  2014/01/24 | 1.0.0.1   | wangxinxiao      | Create file 
+</span></span><span class=line><span class=cl>*
+</span></span><span class=line><span class=cl>*/
+</span></span></code></pre></td></tr></table></div></div><h3 id=其他规范>其他规范</h3><ol><li>符合表达式需要使用小括号，不要使用默认优先级</li><li>判断指针是否为空，如：<code>if (ptr == nullptr)</code></li><li>判断是否为某个值时，值放在前面，如：<code>if (0 == i)</code></li><li>判断<code>bool</code>时，如：<code>if (flag)</code> 与 <code>if (!flag)</code></li></ol></section><footer class=article-footer><section class=article-tags><a href=/tags/%E6%96%87%E6%A1%A3/>文档</a></section><section class=article-lastmod><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<span>最后更新于 Apr 29, 2024 00:00 UTC</span></section></footer></article><aside class=related-content--wrapper><h2 class=section-title>相关文章</h2><div class=related-content><div class="flex article-list--tile"><article><a href=/p/threadlockcpp/><div class=article-details><h2 class=article-title>常见线程锁介绍（C++）</h2></div></a></article></div></div></aside><div id=cusdis_thread data-host=https://cusdis.com data-app-id=f89baeea-dc0f-438a-86e4-89be02b78ab7 data-page-id=54f21a616d879e1415a71c1baa785e22 data-page-url=https://xinxiao.wang/p/rulecpp/ data-page-title=王新晓的代码规范（C++）></div><script async defer src=https://cusdis.com/js/cusdis.es.js></script><script>function setCusdisTheme(e){let t=document.querySelector("#cusdis_thread iframe");t&&window.CUSDIS.setTheme(e)}window.addEventListener("onColorSchemeChange",e=>{setCusdisTheme(e.detail)})</script><footer class=site-footer><section class=copyright>&copy;
+2024 王新晓</section><section class=powerby>人生乱套，我大叫<br>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.26.0>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css crossorigin=anonymous></main></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z+KMkF24hUW8WePSA9HM=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>

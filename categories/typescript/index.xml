@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>TypeScript on 王新晓</title><link>https://xinxiao.wang/categories/typescript/</link><description>Recent content in TypeScript on 王新晓</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Wed, 29 May 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://xinxiao.wang/categories/typescript/index.xml" rel="self" type="application/rss+xml"/><item><title>pinus 学习（二）默认组件介绍</title><link>https://xinxiao.wang/p/pinuslearn2/</link><pubDate>Wed, 29 May 2024 00:00:00 +0000</pubDate><guid>https://xinxiao.wang/p/pinuslearn2/</guid><description>&lt;h1 id="pinus-学习二默认组件介绍">pinus 学习（二）默认组件介绍
+&lt;/h1>&lt;p>上节介绍了pinus框架创建的helloworld示例工程的创建,编译,运行,以及服务器启动的源码分析
+下面来看一下各个组件的具体实现与功能&lt;/p>
+&lt;h3 id="proxycomponent">ProxyComponent
+&lt;/h3>&lt;p>rpc的客户端，在服务器启动后由Monitor组件监视到rpc服务器后添加rpc服务器，使用惰性连接，在第一次使用的时候才会和rpc服务器建立连接，可以自定义使用的协议，默认使用的是mqtt协议&lt;/p>
+&lt;h3 id="remotecomponent">RemoteComponent
+&lt;/h3>&lt;p>rpc服务器，默认使用mqtt协议，会在构造函数里读取服务器组件中的remote和插件中的remote，然后再start里设置&lt;/p>
+&lt;h3 id="monitorcomponent">MonitorComponent
+&lt;/h3>&lt;h3 id="backendsessioncomponent">BackendSessionComponent
+&lt;/h3>&lt;h3 id="servercomponent">ServerComponent
+&lt;/h3>&lt;h3 id="mastercomponent">MasterComponent
+&lt;/h3>&lt;h3 id="heading">
+&lt;/h3></description></item><item><title>pinus 学习（一）项目结构与源码分析启动</title><link>https://xinxiao.wang/p/pinuslearn1/</link><pubDate>Tue, 28 May 2024 00:00:00 +0000</pubDate><guid>https://xinxiao.wang/p/pinuslearn1/</guid><description>&lt;h1 id="pinus-学习一项目结构与源码分析启动">pinus 学习（一）项目结构与源码分析启动
+&lt;/h1>&lt;p>项目结构介绍，项目入口，服务器启动流程介绍&lt;/p>
+&lt;h2 id="目录结构">目录结构
+&lt;/h2>&lt;p>创建一个helloworld示例工程，会创建两个服务器，一个game-server一个web-server，game-server是游戏服务器，目录结构如下&lt;/p>
+&lt;p>&lt;img src="https://xinxiao.wang/p/pinuslearn1/image-20240528165211562.png"
+width="301"
+height="382"
+srcset="https://xinxiao.wang/p/pinuslearn1/image-20240528165211562_huc4417d29ac4616e52dc73b492fe6b08d_13064_480x0_resize_box_3.png 480w, https://xinxiao.wang/p/pinuslearn1/image-20240528165211562_huc4417d29ac4616e52dc73b492fe6b08d_13064_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="game-server目录"
+class="gallery-image"
+data-flex-grow="78"
+data-flex-basis="189px"
+>&lt;/p>
+&lt;ul>
+&lt;li>目录app中存放项目代码&lt;/li>
+&lt;li>目录config中存放服务器配置&lt;/li>
+&lt;li>目录dist是编译后生成的目录&lt;/li>
+&lt;li>目录node_modules是第三方库包&lt;/li>
+&lt;li>文件app.ts是服务器入口&lt;/li>
+&lt;li>文件copy.js 功能是将配置文件拷贝到dist目录&lt;/li>
+&lt;li>文件preload.ts实现捕获错误&lt;/li>
+&lt;li>文件package.js与package-lock.json 是npm包管理配置文件 （依赖的第三方库和自定义脚本）&lt;/li>
+&lt;li>文件tsconfig.json 是 typescript项目的配置文件（编译的配置与需要编译的文件）&lt;/li>
+&lt;/ul>
+&lt;h2 id="项目结构">项目结构
+&lt;/h2>&lt;p>创建的helloworld的示例工程的game-server中启动了两个服务器，master服务器和connector服务器&lt;/p>
+&lt;p>服务器中通过添加组件(component)来增加功能&lt;/p>
+&lt;h3 id="master服务器">master服务器
+&lt;/h3>&lt;h4 id="mastercomponent">MasterComponent
+&lt;/h4>&lt;p>监控功能，启动了其他服务器&lt;/p>
+&lt;h4 id="monitorcomponent">MonitorComponent
+&lt;/h4>&lt;p>监控功能&lt;/p>
+&lt;h3 id="connector服务器">connector服务器
+&lt;/h3>&lt;h4 id="proxycomponent">ProxyComponent
+&lt;/h4>&lt;p>rpc 中 的client，调用其他服务器的函数&lt;/p>
+&lt;h4 id="remotecomponent">RemoteComponent
+&lt;/h4>&lt;p>rpc 中 的server，服务与其他服务器，接收其他服务器的调用&lt;/p>
+&lt;h4 id="connectioncomponent">ConnectionComponent
+&lt;/h4>&lt;p>前台服务器才有，管理连接上的用户信息与用户数量&lt;/p>
+&lt;h4 id="connectorcomponent">ConnectorComponent
+&lt;/h4>&lt;p>前台服务器才有，管理用户连接，发送与接受消息，（根据配置会决定是否启动&lt;strong>DictionaryComponent&lt;/strong>和&lt;strong>ProtobufComponent&lt;/strong>）&lt;/p>
+&lt;h4 id="sessioncomponent">SessionComponent
+&lt;/h4>&lt;p>前台服务器才有，管理sessionID与socket的对应关系，sessionID在connectorComponent中设置&lt;/p>
+&lt;h4 id="pushschedulercomponent">PushSchedulerComponent
+&lt;/h4>&lt;p>前台服务器才有，推送消息&lt;/p>
+&lt;h4 id="backendsessioncomponent">BackendSessionComponent
+&lt;/h4>&lt;p>绑定后台服务器sessionID与（用户和前台服务器）的关系，连接绑定前台服务器与后台服务器的用户&lt;/p>
+&lt;h4 id="channelcomponent">ChannelComponent
+&lt;/h4>&lt;p>将几个用户串成一组，可以群发消息&lt;/p>
+&lt;h4 id="servercomponent">ServerComponent
+&lt;/h4>&lt;p>服务器功能，其中有Filter（过滤器），Handler（处理某条客户端消息），Crons（一些定时任务）&lt;/p>
+&lt;h4 id="monitorcomponent-1">MonitorComponent
+&lt;/h4>&lt;p>监控功能&lt;/p>
+&lt;h2 id="项目启动">项目启动
+&lt;/h2>&lt;p>在game-server目录中执行&lt;code>npm i&lt;/code>安装第三方依赖，然后运行&lt;code>tsc&lt;/code>，编译TS代码，编译结果将输出到dist文件夹中，然后运行&lt;code>node cooy&lt;/code> 拷贝配置文件到dist目录中，再在dist目录中执行&lt;code>node app&lt;/code> ,服务器就启动了。&lt;/p>
+&lt;h2 id="源码分析">源码分析
+&lt;/h2>&lt;h3 id="appts">app.ts
+&lt;/h3>&lt;p>这个文件是入口，创建项目后默认的代码如下&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;span class="lnt">25
+&lt;/span>&lt;span class="lnt">26
+&lt;/span>&lt;span class="lnt">27
+&lt;/span>&lt;span class="lnt">28
+&lt;/span>&lt;span class="lnt">29
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-ts" data-lang="ts">&lt;span class="line">&lt;span class="cl">&lt;span class="kr">import&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">pinus&lt;/span> &lt;span class="p">}&lt;/span> &lt;span class="kr">from&lt;/span> &lt;span class="s1">&amp;#39;pinus&amp;#39;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kr">import&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">preload&lt;/span> &lt;span class="p">}&lt;/span> &lt;span class="kr">from&lt;/span> &lt;span class="s1">&amp;#39;./preload&amp;#39;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm"> * 替换全局Promise
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm"> * 自动解析sourcemap
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm"> * 捕获全局错误
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">preload&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm"> * Init app for client.
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kd">let&lt;/span> &lt;span class="nx">app&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">pinus&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">createApp&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">app&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="kr">set&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;name&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s1">&amp;#39;helloworld&amp;#39;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// app configuration
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nx">app&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">configure&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;production|development&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s1">&amp;#39;connector&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kd">function&lt;/span> &lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">app&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="kr">set&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;connectorConfig&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">connector&lt;/span>: &lt;span class="kt">pinus.connectors.hybridconnector&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">heartbeat&lt;/span>: &lt;span class="kt">3&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">useDict&lt;/span>: &lt;span class="kt">true&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">useProtobuf&lt;/span>: &lt;span class="kt">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">});&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">});&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// start app
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nx">app&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">start&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>这里会启动Master服务器，app.configure的第二个参数说明，这个配置是connector服务器的配置，master在这里不会执行， app.start（）中会加载Master服务器的两个默认Component，并初始化，然后再根据配置文件servers.json去启动connector服务器&lt;/p>
+&lt;p>先来看下app.ts里面的内容&lt;/p>
+&lt;p>&lt;code>let app = pinus.createApp();&lt;/code> 这里创建了Application类，在createApp中调用了init，然后使用&lt;code>app.configure()&lt;/code> 来给每个服务器设置配置，添加自定义组件，最后&lt;code>app.start()&lt;/code> 启动服务器&lt;/p>
+&lt;h3 id="pinuscreateapp">pinus.createApp()
+&lt;/h3>&lt;p>创建一个application，其中init函数如下：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-ts" data-lang="ts">&lt;span class="line">&lt;span class="cl">&lt;span class="nx">init&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">opts&lt;/span> &lt;span class="o">?:&lt;/span> &lt;span class="nx">ApplicationOptions&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">opts&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">opts&lt;/span> &lt;span class="o">||&lt;/span> &lt;span class="p">{};&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kd">let&lt;/span> &lt;span class="nx">base&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">opts&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">base&lt;/span> &lt;span class="o">||&lt;/span> &lt;span class="nx">path&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">dirname&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kr">require&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">main&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">filename&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">this&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="kr">set&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">Constants&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">RESERVED&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">BASE&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">base&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">this&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">base&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">base&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="c1">//设置项目根目录
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">appUtil&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">defaultConfiguration&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="k">this&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">this&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">state&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">STATE_INITED&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">logger&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">info&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;application inited: %j&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="k">this&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">getServerId&lt;/span>&lt;span class="p">());&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">appUtil&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">ts&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kr">export&lt;/span> &lt;span class="kd">function&lt;/span> &lt;span class="nx">defaultConfiguration&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">app&lt;/span>: &lt;span class="kt">Application&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kd">let&lt;/span> &lt;span class="nx">args&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">parseArgs&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">process&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">argv&lt;/span>&lt;span class="p">);&lt;/span>&lt;span class="c1">//解析运行命令参数
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="nx">setupEnv&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">app&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">args&lt;/span>&lt;span class="p">);&lt;/span> &lt;span class="c1">//设置当前环境（Development或是Production）
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="nx">loadMaster&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">app&lt;/span>&lt;span class="p">);&lt;/span> &lt;span class="c1">//从config目录中读取master.json配置记录
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="nx">loadServers&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">app&lt;/span>&lt;span class="p">);&lt;/span> &lt;span class="c1">//从config目录中读取servers.json配置记录
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="nx">processArgs&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">app&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">args&lt;/span>&lt;span class="p">);&lt;/span> &lt;span class="c1">//解析命令行参数，这里面只有master服务器可以从命令行中获取参数，其他服务器都会从配置文件中获取参数
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="nx">configLogger&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">app&lt;/span>&lt;span class="p">);&lt;/span> &lt;span class="c1">//配置日志
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="nx">loadLifecycle&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">app&lt;/span>&lt;span class="p">);&lt;/span> &lt;span class="c1">//helloworld示例工程中没有，根据后面的代码，猜测是插件的加载（插件在后面介绍，大概是一系列功能的集合）
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="appconfigure">app.configure()
+&lt;/h3>&lt;p>根据传入的env和type来决定是否要执行fn里的内容，helloworld示例工程中的这个函数，只有connector服务器需要执行&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-ts" data-lang="ts">&lt;span class="line">&lt;span class="cl">&lt;span class="nx">configure&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">fn&lt;/span>: &lt;span class="kt">ConfigureCallback&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="nx">Application&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">configure&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">env&lt;/span>: &lt;span class="kt">string&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">fn&lt;/span>: &lt;span class="kt">ConfigureCallback&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="nx">Application&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">configure&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">env&lt;/span>: &lt;span class="kt">string&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kr">type&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="kt">string&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">fn&lt;/span>: &lt;span class="kt">ConfigureCallback&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="nx">Application&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">configure&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">env&lt;/span>: &lt;span class="kt">string&lt;/span> &lt;span class="o">|&lt;/span> &lt;span class="nx">ConfigureCallback&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kr">type&lt;/span> &lt;span class="o">?:&lt;/span> &lt;span class="kt">string&lt;/span> &lt;span class="o">|&lt;/span> &lt;span class="nx">ConfigureCallback&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">fn&lt;/span> &lt;span class="o">?:&lt;/span> &lt;span class="nx">ConfigureCallback&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="nx">Application&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kd">let&lt;/span> &lt;span class="nx">args&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">[].&lt;/span>&lt;span class="nx">slice&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">call&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">arguments&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">fn&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">args&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">pop&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">env&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="kr">type&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">Constants&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">RESERVED&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">ALL&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nx">args&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">length&lt;/span> &lt;span class="o">&amp;gt;&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">env&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">args&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">0&lt;/span>&lt;span class="p">];&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nx">args&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">length&lt;/span> &lt;span class="o">&amp;gt;&lt;/span> &lt;span class="mi">1&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kr">type&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">args&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">];&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nx">env&lt;/span> &lt;span class="o">===&lt;/span> &lt;span class="nx">Constants&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">RESERVED&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">ALL&lt;/span> &lt;span class="o">||&lt;/span> &lt;span class="nx">contains&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="k">this&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">settings&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">env&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">env&lt;/span> &lt;span class="kr">as&lt;/span> &lt;span class="kt">string&lt;/span>&lt;span class="p">))&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="kr">type&lt;/span> &lt;span class="o">===&lt;/span> &lt;span class="nx">Constants&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">RESERVED&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">ALL&lt;/span> &lt;span class="o">||&lt;/span> &lt;span class="nx">contains&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="k">this&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">settings&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">serverType&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kr">type&lt;/span> &lt;span class="kr">as&lt;/span> &lt;span class="kt">string&lt;/span>&lt;span class="p">))&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">fn&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">call&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="k">this&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="k">this&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="appstart">app.start()
+&lt;/h3>&lt;p>读取完配置后，这里正式启动服务器&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;span class="lnt">25
+&lt;/span>&lt;span class="lnt">26
+&lt;/span>&lt;span class="lnt">27
+&lt;/span>&lt;span class="lnt">28
+&lt;/span>&lt;span class="lnt">29
+&lt;/span>&lt;span class="lnt">30
+&lt;/span>&lt;span class="lnt">31
+&lt;/span>&lt;span class="lnt">32
+&lt;/span>&lt;span class="lnt">33
+&lt;/span>&lt;span class="lnt">34
+&lt;/span>&lt;span class="lnt">35
+&lt;/span>&lt;span class="lnt">36
+&lt;/span>&lt;span class="lnt">37
+&lt;/span>&lt;span class="lnt">38
+&lt;/span>&lt;span class="lnt">39
+&lt;/span>&lt;span class="lnt">40
+&lt;/span>&lt;span class="lnt">41
+&lt;/span>&lt;span class="lnt">42
+&lt;/span>&lt;span class="lnt">43
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-ts" data-lang="ts">&lt;span class="line">&lt;span class="cl">&lt;span class="nx">start&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">cb&lt;/span> &lt;span class="o">?:&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nx">err&lt;/span> &lt;span class="o">?:&lt;/span> &lt;span class="nb">Error&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">result&lt;/span> &lt;span class="o">?:&lt;/span> &lt;span class="k">void&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">=&amp;gt;&lt;/span> &lt;span class="k">void&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">this&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">startTime&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nb">Date&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">now&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="k">this&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">state&lt;/span> &lt;span class="o">&amp;gt;&lt;/span> &lt;span class="nx">STATE_INITED&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">utils&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">invokeCallback&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">cb&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="k">new&lt;/span> &lt;span class="nb">Error&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;application has already start.&amp;#39;&lt;/span>&lt;span class="p">));&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kd">let&lt;/span> &lt;span class="nx">self&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="k">this&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">appUtil&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">startByType&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kd">function&lt;/span> &lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">appUtil&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">loadDefaultComponents&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">self&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kd">let&lt;/span> &lt;span class="nx">startUp&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="kd">function&lt;/span> &lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">self&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">state&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">STATE_BEFORE_START&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">logger&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">info&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;%j enter before start...&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">self&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">getServerId&lt;/span>&lt;span class="p">());&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">appUtil&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">optComponents&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">self&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">loaded&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">Constants&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">RESERVED&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">BEFORE_START&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kd">function&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nx">err&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nx">err&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">utils&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">invokeCallback&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">cb&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">err&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span> &lt;span class="k">else&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">logger&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">info&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;%j enter start...&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">self&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">getServerId&lt;/span>&lt;span class="p">());&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">appUtil&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">optComponents&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">self&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">loaded&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">Constants&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">RESERVED&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">START&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kd">function&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nx">err&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">self&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">state&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">STATE_START&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nx">err&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">utils&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">invokeCallback&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">cb&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">err&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span> &lt;span class="k">else&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">logger&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">info&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;%j enter after start...&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">self&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">getServerId&lt;/span>&lt;span class="p">());&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">self&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">afterStart&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">cb&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">});&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">});&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">};&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">appUtil&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">optLifecycles&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">self&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">usedPlugins&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">Constants&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">LIFECYCLE&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">BEFORE_STARTUP&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kd">function&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nx">err&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nx">err&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">utils&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">invokeCallback&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">cb&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">err&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span> &lt;span class="k">else&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">startUp&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">});&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">});&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>appUtil.startByType，这个函数可以根据配置决定是否通过master服务器来启动其他服务器，如果不通过master服务器启动，会直接在这里启动服务，start（）后面的逻辑也不会执行了，&lt;/p>
+&lt;p>如果通过Master服务器启动，会执行回调函数，回调函数中&lt;code>appUtil.loadDefaultComponents(self);&lt;/code> 加载了默认的组件，项目结构中介绍了的组件全部是默认组件，connector服务器的组件就是非master服务器的默认组件。&lt;/p>
+&lt;p>加载默认组件会直接创建出来，调用构造函数。&lt;/p>
+&lt;p>下面通过&lt;code>appUtil.optLifecycles&lt;/code> 执行每个插件的beforeStartup，然后再通过&lt;code>appUtil.optComponents&lt;/code> 执行每个组件的beforeStart与start，然后执行 &lt;code>self.afterStart(cb);&lt;/code>，afterStart里面将执行每个组件的afterStart和每个插件的afterStartup&lt;/p>
+&lt;p>最后发送start_server信号，一个服务器就启动了&lt;/p>
+&lt;blockquote>
+&lt;p>组件和插件中的afterStartAll，将会再所有服务器启动后执行，这是单个服务器启动的逻辑，所以没有调用&lt;/p>
+&lt;/blockquote></description></item></channel></rss>

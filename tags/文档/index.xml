@@ -1,0 +1,649 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>文档 on 王新晓</title><link>https://xinxiao.wang/tags/%E6%96%87%E6%A1%A3/</link><description>Recent content in 文档 on 王新晓</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sat, 25 May 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://xinxiao.wang/tags/%E6%96%87%E6%A1%A3/index.xml" rel="self" type="application/rss+xml"/><item><title>常见线程锁介绍（C++）</title><link>https://xinxiao.wang/p/threadlockcpp/</link><pubDate>Sat, 25 May 2024 00:00:00 +0000</pubDate><guid>https://xinxiao.wang/p/threadlockcpp/</guid><description>&lt;h1 id="常见线程锁介绍c">常见线程锁介绍（C++）
+&lt;/h1>&lt;p>互斥锁、条件锁（条件变量）、自旋锁、读写锁、递归锁的应用&lt;/p>
+&lt;h2 id="互斥锁">互斥锁
+&lt;/h2>&lt;p>在多线程情况下，不同线程争对同一份临界资源进行操作时使用的锁，保证临界资源只有一个线程使用，C++ 11 中引入了std:mutex ，linux平台C函数中也有方法&lt;/p>
+&lt;p>加锁后需要解锁，其他线程才能进入，否则会一直等待&lt;/p>
+&lt;h3 id="c函数linux">C函数（Linux）
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 声明一个互斥量
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="kt">pthread_mutex_t&lt;/span> &lt;span class="n">mtx&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 初始化
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nf">pthread_mutex_init&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">mtx&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nb">NULL&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 加锁
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nf">pthread_mutex_lock&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">mtx&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 解锁
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nf">pthread_mutex_unlock&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">mtx&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 销毁
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nf">pthread_mutex_destroy&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">mtx&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 尝试加锁，加锁成功返回0
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nf">pthread_mutex_trylock&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">mtx&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="c11-全平台">C11 (全平台)
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-c++" data-lang="c++">&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 声明一个互斥量（std::mutex不允许拷贝构造，也不允许 move 拷贝）
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">mutex&lt;/span> &lt;span class="n">mtx&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 加锁
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">mtx&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">lock&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 解锁
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">mtx&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">unlock&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 尝试加锁，加锁成功返回true
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">mtx&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">try_lock&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">//RAII应用，使用unique_lock和lock_guard通过构造和析构自动加锁解锁
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">unique_lock&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">mutex&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">locker&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">mtx&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">lock_guard&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">mutex&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">locker&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">mtx&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">//unique_lock可以手动加锁解锁，lock_guard只能通过构造析构加锁解锁
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="条件锁条件变量">条件锁（条件变量）
+&lt;/h2>&lt;p>多线程中，未满足条件的线程会阻塞住，直到条件满足将继续执行的情况下使用的锁&lt;/p>
+&lt;h3 id="c函数linux-1">C函数（Linux)
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;span class="lnt">25
+&lt;/span>&lt;span class="lnt">26
+&lt;/span>&lt;span class="lnt">27
+&lt;/span>&lt;span class="lnt">28
+&lt;/span>&lt;span class="lnt">29
+&lt;/span>&lt;span class="lnt">30
+&lt;/span>&lt;span class="lnt">31
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 申明一个互斥量
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="kt">pthread_cond_t&lt;/span> &lt;span class="n">cond&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 初始化
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nf">pthread_cond_init&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">cond&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 销毁
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nf">pthread_cond_destroy&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">cond&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm">/** 阻塞等待一个条件变量
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm">* 这里将执行三个操作：
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm">* 1. 阻塞并等待条件变量cond满足
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm">* 2. 释放已锁住的互斥锁mtx，（相当于pthread_mutex_unlock(&amp;amp;mtx);）
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm">* 3. 被唤醒后，pthread_cond_wait返回时，解除阻塞并锁住mtx（相当于pthread_mutex_nlock(&amp;amp;mtx);）
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm">* 为什么需要搭配互斥锁mtx使用将在后面解释
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm">*/&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nf">pthread_cond_wait&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">cond&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">mtx&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">struct&lt;/span> &lt;span class="n">timespec&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kt">time_t&lt;/span> &lt;span class="n">tv_sec&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="c1">// seconds 秒
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="kt">long&lt;/span> &lt;span class="n">tv_nsec&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="c1">// nanosecondes 纳秒
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">timespec&lt;/span> &lt;span class="n">abstime&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm">/** 限时阻塞等待一个条件变量
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm">* 除了执行pthread_cond_wait(&amp;amp;cond, &amp;amp;mtx);的操作
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm">* 还会在abstime时间内等待
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm">* 需要注意的是，abstime要填的是1970年1月1日以来到想要停止的时间的秒数
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm">* 超时将返回ETIMEDOUT（非0）
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm">*/&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nf">pthread_cond_timedwait&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">cond&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">mtx&lt;/span>&lt;span class="err">，&lt;/span> &lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">abstime&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 唤醒至少一个阻塞在条件变量上的线程
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nf">pthread_cond_signal&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">cond&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 唤醒全部阻塞在条件变量上的线程
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nf">pthread_cond_broadcast&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">cond&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="c11全平台">C11（全平台）
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-c++" data-lang="c++">&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 申明一个条件变量
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">condition_variable&lt;/span> &lt;span class="n">cv&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">lock_guard&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">mutex&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">locker&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">mtx&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">//这里将要使用互斥锁中的unique_lock
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm">/** 阻塞等待一个条件变量
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm">* 这里将执行三个操作：
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm">* 1. 阻塞并等待条件变量cv满足
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm">* 2. 释放已锁住的互斥锁mtx，（相当于locker.unlock()）
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm">* 3. 被唤醒后，wait返回时，解除阻塞并锁住mtx（相当于locker.lock()）
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm">* 为什么需要搭配互斥锁mtx使用将在后面解释
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm">*/&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">cv&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">wait&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">locker&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 限时阻塞等待一个条件变量，知道经过多久时间，超时将返回false
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">cv&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">wait_for&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">locker&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">rel_time&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 限时阻塞等待一个条件变量，直到等到某个时间点，超时将返回false
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">cv&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">wait_unitl&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">locker&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">point_time&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 唤醒一个在cv上等待的线程
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">cv&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">notify_one&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 唤醒任何在cv上等待的线程
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">cv&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">notify_all&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;blockquote>
+&lt;p>为什么条件锁（条件变量）需要搭配互斥锁使用（作为参数传入）？&lt;/p>
+&lt;p>会出现虚假唤醒的情况，所以需要传入一个locker，防止notify_one（signal）后多个wait同时响应&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="自旋锁">自旋锁
+&lt;/h2>&lt;p>在多线程情况下，不同线程争对同一份临界资源进行操作时使用的锁，保证临界资源只有一个线程使用，&lt;strong>与互斥锁不同的地方在于，如果临界资源被占用，互斥锁会阻塞等待，自旋锁会循环获取锁&lt;/strong>&lt;/p>
+&lt;p>当等待时间较短时可以选择使用自旋锁，可以减少操作系统的用户态与内核态的转换，等待时间较长选择使用互斥锁。&lt;/p>
+&lt;p>自旋锁在C11中并没有给出实现，需要自己使用std::atomic来进行实现&lt;/p>
+&lt;h3 id="c函数linux-2">C函数（Linux）
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 声明一个互斥量
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="kt">pthread_spinlock_t&lt;/span> &lt;span class="n">lock&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 初始化
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nf">pthread_spin_init&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">lock&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 加锁
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nf">pthread_spin_lock&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">lock&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 解锁
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nf">pthread_spin_unlock&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">lock&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">//销毁
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nf">pthread_spin_destroy&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">lock&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 尝试加锁，加锁成功返回0
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nf">pthread_spin_trylock&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">lock&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="c11全平台-1">C11(全平台)
+&lt;/h3>&lt;p>这里使用atomic实现了自旋锁&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-c++" data-lang="c++">&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 使用C++11的原子操作实现自旋锁（默认内存序，memory_order_seq_cst）
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="k">class&lt;/span> &lt;span class="nc">spin_mutex&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// flag对象所封装的bool值为false时，说明自旋锁未被线程占有。
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">atomic&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="kt">bool&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">flag&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">ATOMIC_VAR_INIT&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">false&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">public&lt;/span>&lt;span class="o">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">spin_mutex&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="k">default&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">spin_mutex&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="k">const&lt;/span> &lt;span class="n">spin_mutex&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="k">delete&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">spin_mutex&lt;/span>&lt;span class="o">&amp;amp;&lt;/span> &lt;span class="k">operator&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="k">const&lt;/span> &lt;span class="n">spin_mutex&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="k">delete&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kt">void&lt;/span> &lt;span class="nf">lock&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kt">bool&lt;/span> &lt;span class="n">expected&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nb">false&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// CAS原子操作。判断flag对象封装的bool值是否为期望值(false)，若为bool值为false，与期望值相等，说明自旋锁空闲。
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="c1">// 此时，flag对象封装的bool值写入true，CAS操作成功，结束循环，即上锁成功。
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="c1">// 若bool值为为true，与期望值不相等，说明自旋锁被其它线程占据，即CAS操作不成功。然后，由于while循环一直重试，直到CAS操作成功为止。
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="k">while&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">!&lt;/span>&lt;span class="n">flag&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">compare_exchange_strong&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">expected&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nb">true&lt;/span>&lt;span class="p">)){&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">expected&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nb">false&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kt">void&lt;/span> &lt;span class="nf">unlock&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">flag&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">store&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">false&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">};&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="读写锁">读写锁
+&lt;/h2>&lt;p>多线程中对，临界资源的访问方式有两种：读和写。其中，&lt;strong>写操作是独占的&lt;/strong>而&lt;strong>读操作是非独占的&lt;/strong>，多个线程可以同时读这个共享变量，读写锁就可以用在这种情况下&lt;/p>
+&lt;h3 id="c函数linux-3">C函数（Linux)
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 声明一个读写锁
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="kt">pthread_rwlock_t&lt;/span> &lt;span class="n">m_rw_lock&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 初始化
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nf">pthread_rwlock_init&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">m_rw_lock&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nb">NULL&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 读加锁
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nf">pthread_rwlock_rdlock&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">pthread_rwlock_t&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 读尝试加锁，成功返回0
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nf">pthread_rwlock_tryrdlock&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">pthread_rwlock_t&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 写加锁
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nf">pthread_rwlock_wrlock&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">pthread_rwlock_t&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 写尝试加锁，成功返回0
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nf">pthread_rwlock_trywrlock&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">pthread_rwlock_t&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 解锁
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nf">pthread_rwlock_unlock&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">pthread_rwlock_t&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 销毁
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nf">pthread_rwlock_destroy&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">pthread_rwlock_t&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="c17全平台">C17（全平台）
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-c++" data-lang="c++">&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 声明
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">shared_mutex&lt;/span> &lt;span class="n">mtx&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">//独占锁定
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 加锁
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">mtx&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">lock&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 解锁
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">mtx&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">unlock&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 尝试加锁，加锁成功返回true
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">mtx&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">try_lock&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">//共享锁定
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 加锁
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">mtx&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">lock_shared&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 解锁
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">mtx&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">unlock_shared&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 尝试加锁，加锁成功返回true
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">mtx&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">try_lock_shared&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">//RAII应用，使用unique_lock和shared_lock通过构造和析构自动加锁解锁
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">//shared_lock是在读的时候使用，unique_lock在写的时候使用
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">unique_lock&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">mutex&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">locker&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">mtx&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">shared_lock&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">mutex&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">locker&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">mtx&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="递归锁">递归锁
+&lt;/h2>&lt;p>递归锁可以重复加锁，会记录加锁的次数，每次加锁，计数+1，且判断如果已经锁住，不做处理，每次解锁，计数-1&lt;/p>
+&lt;h3 id="c-函数linux">C 函数（Linux)
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 声明
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="kt">pthread_mutexattr_t&lt;/span> &lt;span class="n">attr&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 初始化
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nf">pthread_mutexattr_init&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">mtx&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nb">NULL&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 加锁
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nf">pthread_mutexattr_lock&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">mtx&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 解锁
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nf">pthread_mutexattr_unlock&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">mtx&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 销毁
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nf">pthread_mutexattr_destroy&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">mtx&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 尝试加锁，加锁成功返回0
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nf">pthread_mutexattr_trylock&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">mtx&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="c11全平台-2">C11（全平台）
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-c++" data-lang="c++">&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 声明
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">recursive_mutex&lt;/span> &lt;span class="n">rmtx&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 加锁
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">rmtx&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">lock&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 解锁
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">rmtx&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">unlock&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 尝试加锁，加锁成功返回true
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">rmtx&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">try_lock&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">//RAII应用，使用unique_lock和lock_guard通过构造和析构自动加锁解锁
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">unique_lock&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">mutex&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">locker&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">rmtx&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">lock_guard&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">mutex&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">locker&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">rmtx&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">//unique_lock可以手动加锁解锁，lock_guard只能通过构造析构加锁解锁
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div></description></item><item><title>王新晓的代码规范（C++）</title><link>https://xinxiao.wang/p/rulecpp/</link><pubDate>Mon, 29 Apr 2024 00:00:00 +0000</pubDate><guid>https://xinxiao.wang/p/rulecpp/</guid><description>&lt;h1 id="cc编码规范">C/C++编码规范
+&lt;/h1>&lt;p>以下编码规则仅适用于王新晓的 C/C++代码&lt;/p>
+&lt;h2 id="一文件结构">一、文件结构
+&lt;/h2>&lt;h3 id="头文件规范">头文件规范
+&lt;/h3>&lt;ol>
+&lt;li>一个头文件需要 #define保护，命名格式为：&lt;code>_&amp;lt;PROJECT&amp;gt;_&amp;lt;PATH&amp;gt;_&amp;lt;FILE&amp;gt;_H_&lt;/code>
+如：项目xzpt中，头文件xzpt\Classes\xzpt\xzptGameSence.h应定义如下：（需要写全路径）（宏定义 #endif 后须加注释）&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="cp">#ifndef _XZPT_XZPT_XZPTGAMESENCE_H_
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cp">#define _XZPT_XZPT_XZPTGAMESENCE_H_
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cp">#endif &lt;/span>&lt;span class="c1">// _XZPT_XZPT_XZPTGAMESENCE_H_
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ol start="2">
+&lt;li>&lt;code>#include&lt;/code>的顺序（每种头文件间应空行）
+&lt;ol>
+&lt;li>当前文件的对应头文件&lt;/li>
+&lt;li>C系统文件&lt;/li>
+&lt;li>C++系统文件&lt;/li>
+&lt;li>其他库的头文件&lt;/li>
+&lt;li>本项目的头文件&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ol>
+&lt;h2 id="二命名规范">二、命名规范
+&lt;/h2>&lt;h3 id="文件命名">文件命名
+&lt;/h3>&lt;p>使用小驼峰法命名如：
+&lt;code>xzptGameSence.cpp&lt;/code>
+&lt;code>xzptGameSence.h&lt;/code>&lt;/p>
+&lt;h3 id="类型命名">类型命名
+&lt;/h3>&lt;p>class 开头为 C， struct开头为S， interface开头为I
+大驼峰法
+例如：
+&lt;code>CXzptGameSence&lt;/code>
+&lt;code>SXzptUserInfo&lt;/code>
+&lt;code>IXzptLogin&lt;/code>&lt;/p>
+&lt;h3 id="变量命名">变量命名
+&lt;/h3>&lt;p>指针需在结尾添加_ptr，若为常量指针（我这里的意思是指针不能改变指向的东西，但是可以改变这个指向的东西的内容）需在结尾添加_cPtr&lt;/p>
+&lt;h4 id="局部变量">局部变量
+&lt;/h4>&lt;p>以下划线开头，第一个单词代表变量的类型(STL中的情况使用小驼峰法命名)，第二个单词为项目名称，第三个单词为变量意义（使用小驼峰法），每个单词之间加下滑线，例如：
+&lt;code>Sprite* _sprite_xzpt_up_leaves_ptr;&lt;/code>
+&lt;code>int _int_xzpt_Level;&lt;/code>
+&lt;code>std::vector&amp;lt;Sprite&amp;gt; _vectorSprite_xzpt_listMoveShape;&lt;/code>
+&lt;code>std::list&amp;lt;xzptSprite*&amp;gt; _listXzptSpritePtr_xzpt_listShape;&lt;/code>&lt;/p>
+&lt;h4 id="全局变量">全局变量
+&lt;/h4>&lt;p>以g_开头，第一个单词代表变量的类型(STL中的情况使用小驼峰法命名)，第二个单词为项目名称，第三个单词为变量意义（使用小驼峰法），每个单词间添加下滑线，例如：
+&lt;code>char* g_char_xzpt_userInfoData_ptr;&lt;/code>
+&lt;code>int g_int_xzpt_version;&lt;/code>&lt;/p>
+&lt;h4 id="成员变量">成员变量
+&lt;/h4>&lt;p>以m_开头，第一个单词代表变量的类型(STL中的情况使用小驼峰法命名)，第二个单词为项目名称，第三个单词为变量意义（使用小驼峰法），每个单词间添加下滑线，例如：
+&lt;code>Sprite* m_sprite_xzpt_hand_ptr;&lt;/code>
+&lt;code>int m_int_xzpt_actionNum;&lt;/code>&lt;/p>
+&lt;h4 id="函数中的参数">函数中的参数
+&lt;/h4>&lt;ol>
+&lt;li>直接写变量含义，例如：
+&lt;code>calMinDistanceLineWithShape(Vec2 pointX, Vec2 pointY, Vec2 pointM);&lt;/code>&lt;/li>
+&lt;li>函数中的参数如果是传出数据使用，再开头添加out，使用小驼峰法，例如：
+&lt;code>calMaxTwoNumber(int num0, int num1, int&amp;amp; outResultNumber)&lt;/code>&lt;/li>
+&lt;/ol>
+&lt;h4 id="其他补充规则">其他补充规则
+&lt;/h4>&lt;ol>
+&lt;li>for循环中括号内的局部循环标记量可直接定义为字母，使用字母顺序如下 &lt;code>i&lt;/code> &lt;code>j&lt;/code> &lt;code>m&lt;/code> &lt;code>n&lt;/code> &lt;code>x&lt;/code> &lt;code>y&lt;/code> &lt;code>z&lt;/code> ，之后的不做顺序规定&lt;/li>
+&lt;li>其中基础类型名称在对象名中体现可以只写首字母，例如：&lt;code>int _i_xzpt_level;&lt;/code>&lt;/li>
+&lt;li>单例对象用大写A开头，整体采用大驼峰法&lt;/li>
+&lt;/ol>
+&lt;h3 id="常量命名">常量命名
+&lt;/h3>&lt;p>以c_开头，第一个单词代表变量的类型(STL中的情况使用小驼峰法命名)，第二个单词为项目名称，第三个单词为变量意义（使用小驼峰法），每个单词间添加下滑线，例如：
+&lt;code>const char* c_char_xzpt_direction_ptr;&lt;/code>&lt;/p>
+&lt;p>&lt;strong>注意：常量与变量相同拥有全局常量，局部常量等情况，故规定如下&lt;/strong>
+1. &lt;strong>局部常量为 _c_开头&lt;/strong>
+2. &lt;strong>其他情况可直接与开头字母合并，如下(若为全局变量)&lt;/strong>
+&lt;code>const char* const cg_char_xzpt_hurdleInfoData_cPtr = &amp;quot;123.txt&amp;quot;;&lt;/code>
+或
+&lt;code>const char* const gc_char_xzpt_hurdleInfoData_cPtr = &amp;quot;123.txt&amp;quot;;&lt;/code>
+&lt;strong>此处gc与cg皆可&lt;/strong>&lt;/p>
+&lt;h3 id="静态量命名">静态量命名
+&lt;/h3>&lt;p>以s_开头，第一个单词代表变量的类型(STL中的情况使用小驼峰法命名)，第二个单词为项目名称，第三个单词为变量意义（使用小驼峰法），每个单词间添加下滑线，例如：
+&lt;code>static bool s_bool_xzpt_firstTimeGetDesign;&lt;/code>
+&lt;strong>此处注意与常量注意相同，若遇到常量，静态，全局等因素组合，除局部因素将_s加在开头外，其他因素皆可直接组合例如：&lt;/strong>
+&lt;code>static cont bool scg_bool_xzpt_firstTimeGetDesign = true;&lt;/code>
+&lt;strong>scg可任意排列组合&lt;/strong>&lt;/p>
+&lt;h3 id="函数命名">函数命名
+&lt;/h3>&lt;ol>
+&lt;li>函数名必须直观，并且能正确表达其内在功能&lt;/li>
+&lt;li>对于函数参数中的引用和指针类型视情况以const修饰&lt;/li>
+&lt;li>对于不修改数据成员的类成员函数，以const修饰&lt;/li>
+&lt;li>函数名以小写开头，使用小驼峰法&lt;/li>
+&lt;li>返回值为布尔型的一些检测函数，正确的要返回true，错误的返回false，不要调转含义&lt;/li>
+&lt;/ol>
+&lt;h3 id="宏命名规范">宏命名规范
+&lt;/h3>&lt;ol>
+&lt;li>尽量不使用宏定义&lt;/li>
+&lt;li>如果使用宏需全部大写，每个单词以下滑线分割&lt;/li>
+&lt;/ol>
+&lt;h3 id="typedef类型命名规范">typedef类型命名规范
+&lt;/h3>&lt;p>&lt;code>typedef std::vector&amp;lt;int&amp;gt; SeqInt;&lt;/code> //vector的全部都在前面加Seq。
+&lt;code>typedef ::std::map&amp;lt;int, int&amp;gt; DictIntInt;&lt;/code>//map在cdl中加前缀Dict，在代码中用Map&lt;/p>
+&lt;ol>
+&lt;li>必须以大写开头。&lt;/li>
+&lt;li>命名翻译的是内部的组成，例如SeqInt，一看就是vector&lt;int>。不能改为PlayerId这种具有确切意义的命名，缺乏通用性。具体含义应该在变量名上反映出来。&lt;/li>
+&lt;/ol>
+&lt;h2 id="代码风格">代码风格
+&lt;/h2>&lt;h3 id="空格放置">空格放置
+&lt;/h3>&lt;ol>
+&lt;li>循环后加空格再加括号，例：&lt;code>for (int i = 0; i &amp;lt; 10; ++i)&lt;/code>&lt;/li>
+&lt;li>函数名后不需要加空格，紧跟&lt;code>(&lt;/code> &lt;code>)&lt;/code>&lt;/li>
+&lt;li>&lt;code>(&lt;/code> 后紧跟与 &lt;code>)&lt;/code>后紧跟不加空格&lt;/li>
+&lt;li>嵌套&lt;code>(&lt;/code> &lt;code>)&lt;/code> 与&lt;code>(&lt;/code> &lt;code>)&lt;/code> 之间加空格如：&lt;code>if ( (x == 1) &amp;amp;&amp;amp; (x == 2) )&lt;/code>&lt;/li>
+&lt;li>&lt;code>;&lt;/code>不是结尾加空格&lt;/li>
+&lt;li>除&lt;code>[ ]&lt;/code>、&lt;code>.&lt;/code>、&lt;code>-&amp;gt;&lt;/code>、&lt;code>::&lt;/code>外，双目操作符， 如&lt;code>=&lt;/code>、&lt;code>+=&lt;/code>、&lt;code>&amp;gt;=&lt;/code>、&lt;code>&amp;lt;= &lt;/code>、&lt;code>+&lt;/code>、&lt;code>* &lt;/code>、&lt;code>% &lt;/code>、&lt;code>&amp;amp;&amp;amp; &lt;/code>、&lt;code>||&lt;/code>、&lt;code>&amp;lt;&amp;lt;&lt;/code>、&lt;code>^&lt;/code>等两侧各留一个空格。&lt;/li>
+&lt;li>单目操作符如&lt;code>!&lt;/code>、&lt;code>~&lt;/code>、&lt;code>++&lt;/code>、&lt;code>--&lt;/code>、&lt;code>&amp;amp;&lt;/code>（地址运算符）与操作数之间不留空格。&lt;/li>
+&lt;li>当一个函数的返回值是指针变量或引用变量时，类型与操作符（&lt;code>*&lt;/code>或&lt;code>&amp;amp;&lt;/code>）之间不留空格，操作符之后留一个空格；&lt;/li>
+&lt;li>定义指针时，&lt;code>*&lt;/code>放在对象前，与对象中间无空格，当作为函数入参时，&lt;code>*&lt;/code>放在类后，与类中间无空格&lt;/li>
+&lt;li>&lt;code>{&lt;/code> &lt;code>}&lt;/code> 用于初始化时不换行，在中间加空格&lt;/li>
+&lt;/ol>
+&lt;h3 id="布局规范">布局规范
+&lt;/h3>&lt;ol>
+&lt;li>每个函数，成员函数声明之间保留一个空格&lt;/li>
+&lt;li>同一个函数体内，有语义转换时，保留一个空行&lt;/li>
+&lt;li>&lt;code>{&lt;/code> &lt;code>}&lt;/code>会换行&lt;/li>
+&lt;li>&lt;code>++&lt;/code> &lt;code>--&lt;/code>前后可选择时，放在前面&lt;/li>
+&lt;li>&lt;code>{&lt;/code> &lt;code>}&lt;/code> 用于初始化时不换行，在中间加空格&lt;/li>
+&lt;/ol>
+&lt;h3 id="注释规范">注释规范
+&lt;/h3>&lt;ol>
+&lt;li>块注释使用&lt;code>/* */&lt;/code>， 行注释使用&lt;code>//&lt;/code>&lt;/li>
+&lt;li>函数声明前需注释函数含义（除非特别简单能从函数命名推测出来）（若函数功能简单，无需介绍返回值与参数也可以使用 &lt;code>//&lt;/code>直接写注释）具体格式如下：&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">/**
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">* @brief 这里写函数功能
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">* @param i 参数1
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">* @return 返回说明
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">* -&amp;lt;em&amp;gt;false&amp;lt;/em&amp;gt; fail
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">* -&amp;lt;em&amp;gt;true&amp;lt;/em&amp;gt; succeed
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">*/
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">bool funciotn(int i)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ol start="3">
+&lt;li>代码的注释放在该行代码上&lt;/li>
+&lt;li>函数实现的开头需要写函数实现的大致步骤（特别简单的可不写）&lt;/li>
+&lt;li>每个文件最前面需写注释，格式如下(可适当删除不需要的项）)：&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">/**
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">* @file Example.h
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">* @brief 对文件的简述
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">* Details.
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">*
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">* @author wangxinxiao
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">* @email wxx1035@163.com
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">* @version 1.0.0.1(版本号)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">* @date 2022/5/11
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">* @license GNU General Public License (GPL)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">*
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">* Remark : Description
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">*
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">* Change History :
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">* &amp;lt;Date&amp;gt; | &amp;lt;Version&amp;gt; | &amp;lt;Author&amp;gt; | &amp;lt;Description&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">* 2014/01/24 | 1.0.0.1 | wangxinxiao | Create file
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">*
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">*/
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="其他规范">其他规范
+&lt;/h3>&lt;ol>
+&lt;li>符合表达式需要使用小括号，不要使用默认优先级&lt;/li>
+&lt;li>判断指针是否为空，如：&lt;code>if (ptr == nullptr)&lt;/code>&lt;/li>
+&lt;li>判断是否为某个值时，值放在前面，如：&lt;code>if (0 == i)&lt;/code>&lt;/li>
+&lt;li>判断&lt;code>bool&lt;/code>时，如：&lt;code>if (flag)&lt;/code> 与 &lt;code>if (!flag)&lt;/code>&lt;/li>
+&lt;/ol></description></item></channel></rss>
